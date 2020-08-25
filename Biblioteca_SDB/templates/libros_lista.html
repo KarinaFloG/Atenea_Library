@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block contentenido %}
+    <h1>{% block titulo %} Biblioteca "{{ nombre_biblioteca}}" {% endblock %}</h1>
+    <h2>Libros</h2>
+    <hr>
+
+    {% for libro in libros %}
+        <h3>Título: {{ libro['titulo'] }}</h3>
+        <h4>Autor: {{ libro['autor'] }}</h4> 
+        <span class="badge badge-primary">{{ libro['anio'] }}</span>
+        <a href="libro/{{loop.index0}}">Detalles</a>
+        <hr>
+    {% endfor %}
+
+{% endblock %}

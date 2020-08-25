@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block contentenido %}
+    <h1>{% block titulo %} Biblioteca "{{ nombre_biblioteca}}" {% endblock %}</h1>
+    <h2>Detalles del libro</h2>
+    <hr>
+    <h3>Título: {{ libro['titulo'] }}</h3>
+    <h4>Autor: {{ libro['autor'] }}</h4> 
+    <h4>Año: {{ libro['anio'] }}</h4> 
+    <h4>Editorial: {{ libro['editorial'] }}</h4> 
+    <h4>Número de páginas: {{ libro['paginas_totales'] }}</h4> 
+    <h4>País: {{ libro['pais'] }}</h4> 
+    <span class="badge badge-primary">{{ libro['anio'] }}</span>
+    <p><strong>Reseña: </strong>{{ libro['resenia'] }}</p>
+    <hr>
+{% endblock %}
