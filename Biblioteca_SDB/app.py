@@ -1,4 +1,4 @@
-from flask import Flask, render_template,url_for
+from flask import Flask, render_template,url_for, redirect, request, flash
 
 app = Flask(__name__)
 
@@ -49,6 +49,26 @@ def libros_lista():
 @app.route('/libros/libro/<int:id>')
 def libro(id):
     return render_template('libro.html', libro = libros[id], nombre_biblioteca = nombre_biblioteca)
+
+@app.route('/libros/agregar', methods=('GET', 'POST'))
+def agregar_libro():
+    if request.method == 'POST':
+        if not request.form['titulo']:
+            flash('El titulo es requerido')
+        else:
+            libro_nuevo = { 
+                "titulo" : request.form['titulo'],
+                "autor" : request.form['autor'],
+                "anio" : request.form['anio'],
+                "editorial" : request.form['editorial'],
+                "paginas_totales" : request.form['paginas_totales'],
+                "portada" : "",
+                "pais": request.form['pais'],
+                "resenia": request.form['resenia']
+            }
+            libros.append(libro_nuevo)
+            return redirect(url_for('libros_lista'))
+    return render_template('agregar_libro.html', nombre_biblioteca = nombre_biblioteca)
 
 if __name__ == "__main__":
 	app.run(debug=TRUE)
