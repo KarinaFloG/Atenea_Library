@@ -1,11 +1,12 @@
 from flask import Flask, render_template,url_for, redirect, request, flash
 import pymongo
-
+import sys
+from datetime import datetime, timedelta
 app = Flask(__name__)
 
 nombre_biblioteca = 'Atenea'
 
-cliente = pymongo.MongoClient("mongodb+srv://administrador:<usser>@atenea.hfd08.gcp.mongodb.net/<bd>?retryWrites=true&w=majority")
+cliente = pymongo.MongoClient("mongodb+srv://administrador:sectei@atenea.hfd08.gcp.mongodb.net/biblioteca_bd?retryWrites=true&w=majority")
 
 mi_bd = cliente["biblioteca_bd"]
 
@@ -42,6 +43,12 @@ libros = [
         "resenia": "Del control de las leyes al mercado de los cuerpos"
     }
 ]
+
+@app.route('/libros_many/agregar')
+def agregar_libros():
+    mi_col = mi_bd["libros"]
+    mi_col.insert_many(libros)
+    return render_template('libros_lista.html', libros = libros, nombre_biblioteca = nombre_biblioteca)
 
 @app.route('/')
 def index():
@@ -124,5 +131,46 @@ def usuaria_elimina():
     ussers =  mi_col.find()
     return render_template('usuarias_lista.html', ussers = ussers, nombre_biblioteca = nombre_biblioteca)
 
+@app.route('/prestamo/agregar',methods=('GET', 'POST'))
+def agregar_prestamo():
+    mi_col = mi_bd["usuarias"]
+    mi_col2 = mi_bd["libros"]
+    mi_col3 = mi_bd["prestamos"]
+    ussers = mi_col.find()
+    books = mi_col2.find()
+    prestamo = mi_col3.find()
+
+    if request.method == 'POST':
+        if not request.form['fecha']:
+            flash('La usuaria es requerida')
+        else:
+            title = request.form['titulo']
+            query_libro = {"titulo": title}
+            libro = mi_col2.find(query_libro)
+            for element in libro:
+                idLibro = element['_id']
+
+            name = request.form['nombre']
+            #apPaterno = request.form['apellidoPaterno']
+            #apMaterno = request.form['apellidoMaterno']
+            query_usuaria = {"nombre": name}
+            usuaria = mi_col.find(query_usuaria)
+            for element in usuaria:
+                idUsuaria = element['_id']
+                print("ID",idUsuaria)
+
+            fechaActual = datetime.now()
+            fechaEntrega = fechaActual + timedelta(days=7)
+            prestamo_add = { 
+                "idUsuaria" : idUsuaria,
+                "idLibro" : idLibro,
+                "fechaPrestamo" : fechaActual,
+                "fechaEntrega" : fechaEntrega
+            }
+            prest = mi_col3.insert_one(prestamo_add)
+    return render_template('agregar_prestamo.html',ussers = ussers, books = books, nombre_biblioteca = nombre_biblioteca)
+
 if __name__ == "__main__":
 	app.run(debug=TRUE)
+
+
