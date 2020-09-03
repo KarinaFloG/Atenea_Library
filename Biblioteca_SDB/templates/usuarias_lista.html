@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block contentenido %}
+    <h1>{% block titulo %} Biblioteca "{{ nombre_biblioteca}}" {% endblock %}</h1>
+    <h2>Usuarioas</h2>
+    <hr>
+
+    {% for usser in ussers %}
+        <h3>Nombre: {{ usser['nombre'] }}</h3>
+        <h2>Apellido Paterno: {{ usser['apellidoPaterno'] }}</h4> 
+        <h3>Apellido Materno: {{ usser['apellidoMaterno'] }}</h4> 
+        <h2>Correo: {{ usser['correo'] }}</h4> 
+        <hr>
+    {% endfor %}
+
+{% endblock %}

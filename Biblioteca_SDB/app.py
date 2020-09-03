@@ -1,8 +1,14 @@
 from flask import Flask, render_template,url_for, redirect, request, flash
+import pymongo
 
 app = Flask(__name__)
 
 nombre_biblioteca = 'Atenea'
+
+cliente = pymongo.MongoClient("mongodb+srv://administrador:<usser>@atenea.hfd08.gcp.mongodb.net/<bd>?retryWrites=true&w=majority")
+
+mi_bd = cliente["biblioteca_bd"]
+
 
 libros = [
     {
@@ -69,6 +75,54 @@ def agregar_libro():
             libros.append(libro_nuevo)
             return redirect(url_for('libros_lista'))
     return render_template('agregar_libro.html', nombre_biblioteca = nombre_biblioteca)
+
+@app.route('/usuarias/agregar', methods=('GET', 'POST'))
+def agregar_usuaria():
+    mi_col = mi_bd["usuarias"]
+    if request.method == 'POST':
+        if not request.form['nombre']:
+            flash('El nombre es requerido')
+        else:
+            usuaria_add = { 
+                "nombre" : request.form['nombre'],
+                "apellidoPaterno" : request.form['apellidoPaterno'],
+                "apellidoMaterno" : request.form['apellidoMaterno'],
+                "correo" : request.form['correo'],
+                "password" : request.form['password'],
+            }
+            usser = mi_col.insert_one(usuaria_add)
+            print("El id de la usuaria es:", usser.inserted_id)
+            return redirect(url_for('agregar_usuaria'))
+    return render_template('agregar_usuaria.html', nombre_biblioteca = nombre_biblioteca)
+
+@app.route('/usuarias/lista')
+def usuarias_lista(): 
+    mi_col = mi_bd["usuarias"]
+    ussers =  mi_col.find() 
+    return render_template('usuarias_lista.html', ussers = ussers, nombre_biblioteca = nombre_biblioteca)
+
+@app.route('/usuarias/filtro')
+def usuaria(): 
+    mi_col = mi_bd["usuarias"]
+    ussers =  mi_col.find({"nombre":"Karina"})
+    return render_template('usuaria.html',ussers = ussers, nombre_biblioteca = nombre_biblioteca)
+
+@app.route('/usuaria/actualiza')
+def usuaria_actualiza(): 
+    mi_col = mi_bd["usuarias"]
+    mi_query = { "nombre": "Karina" }
+    ussers =  mi_col.find(mi_query)
+    nuevos_datos_usuaria = { "$set": { "correo": "karla@gmail.com", "apellidoMaterno": "Mexico" }}
+    mi_col.update_one(mi_query, nuevos_datos_usuaria)
+    return render_template('usuaria.html',ussers = ussers, nombre_biblioteca = nombre_biblioteca)
+
+@app.route('/usuaria/elimina')
+def usuaria_elimina(): 
+    mi_col = mi_bd["usuarias"]
+    mi_query = { "nombre": "Karina" }
+    mi_col.delete_one(mi_query)
+    ussers =  mi_col.find()
+    return render_template('usuarias_lista.html', ussers = ussers, nombre_biblioteca = nombre_biblioteca)
 
 if __name__ == "__main__":
 	app.run(debug=TRUE)
